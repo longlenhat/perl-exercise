@@ -7,9 +7,9 @@ my @aWords = ("Alpha","Beta","Gamma","Delta","Epsilon","Psi","Eta","My","Ny","Xi
 
 sub head {
     my ($iNum, @aArr) = @_;
-    # print $iNum,"\n";
-    # print "@aArr","\n";
+
     if ($iNum > scalar @aArr) {
+        print "value greater than array size given, returning whole array: ";
         print join(", ", @aArr),"\n";
     } else {
         print "filtered the first $iNum elements: ", join(", ", splice(@aArr, 0, $iNum)),"\n";
