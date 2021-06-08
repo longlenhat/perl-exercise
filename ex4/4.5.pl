@@ -4,12 +4,13 @@
 use File::Basename;
 
 my $sTempDir = "./temp/";
-# my @files = grep {/\.txt$/} readdir $dir;
-# my @files = grep {-T "./temp/$_"} readdir $dir;
+
+# create temp folder if not already created
 unless (mkdir($sTempDir)) {
     print "Unable to create directory: $!\n";
 }
 
+# create sample test.txt files
 for (my $i = 1; $i <= 3; $i++) {
     my $sFileName = $sTempDir."test".$i.".txt";
     unless (open FILE, ">".$sFileName) { 
@@ -17,22 +18,24 @@ for (my $i = 1; $i <= 3; $i++) {
     }
 }
 
+# sub for converting .txt files to .bak files
 sub txtToBak {
     my @files = glob "$sTempDir/*.txt";
     foreach (@files) {
         my $sOldName = $_;
-        (my $sNewName = $sOldName) =~ s/\.[^.]+$//;
+        (my $sNewName = $sOldName) =~ s/\.[^.]+$//; # regex for filtering out the filename without extension
         $sNewName =  $sNewName . ".bak";
         rename $_, $sNewName or die "cannot rename file: $!";
         print basename($_), " renamed to ", basename($sNewName), "\n";
     }
 }
 
+# sub for converting .bak files to .txt files
 sub bakToTxt {
     my @files = glob "$sTempDir/*.bak";
     foreach (@files) {
         my $sOldName = $_;
-        (my $sNewName = $sOldName) =~ s/\.[^.]+$//;
+        (my $sNewName = $sOldName) =~ s/\.[^.]+$//; # regex for filtering out the filename without extension
         $sNewName =  $sNewName . ".txt";
         rename $_, $sNewName or die "cannot rename file: $!";
         print basename($_), " renamed to ", basename($sNewName), "\n";
