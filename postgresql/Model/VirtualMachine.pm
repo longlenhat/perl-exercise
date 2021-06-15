@@ -1,7 +1,6 @@
+package VirtualMachine;
 use strict;
 use warnings;
-
-package VirtualMachine;
 
 sub new {
     my ($class, %args) = @_;

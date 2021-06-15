@@ -1,8 +1,7 @@
+package Storage;
 use strict;
 use warnings;
 use Time::Piece;
-
-package Storage;
 
 sub new {
     my ($class, %args) = @_;
