@@ -7,9 +7,18 @@ sub new {
     my $self = {
         "name" => $args{"name"} || "undefined",
         "os" => $args{"os"} || "undefined",
-        "storage" => $args{"storage"} || "undefined",
-        "checksum" => $args{"checksum"},
-    }
+        "checksum" => $args{"checksum"} || "undefined",
+    };
+    
+    my $o_vm = bless ($self, $class);
+    $o_vm->_set_datetime();
+    return $o_vm;
+}
+
+sub _set_datetime {
+    my $self = shift @_;
+    my $s_time = localtime;
+    $self->{"created_on"} = $s_time;
 }
 
 return 1;
