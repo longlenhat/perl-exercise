@@ -16,6 +16,7 @@ my $o_db_handler = ();
 sub new {
    my ($self, $hr_params) = @_;
    $s_dbname = $hr_params->{"db_name"};
+   die "must provide database name 'db_name' to connect to!\n" if $s_dbname eq "";
 
    # connection config
    $o_db_handler = DBI->connect(
@@ -37,8 +38,9 @@ sub create_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
 
-   my $query = "CREATE TABLE $s_tablename (
-   );";
+   die "cannot create table: 'table_name' must be provided!\n" if $s_tablename eq "";
+
+   my $query = "CREATE TABLE $s_tablename ();";
    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
    print "Successfully created table '$s_tablename'\n";
 }
@@ -47,37 +49,47 @@ sub delete_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
 
+   die "cannot delete table: 'table_name' must be provided!\n" if $s_tablename eq "";
+
    my $query = "DROP TABLE $s_tablename;";
    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
    print "Successfully deleted table '$s_tablename'\n";
 }
 
 sub add_column_to_table {
-   my ($self, $table_name, $hr_params) = @_;
-   my $s_colName = $hr_params->{"col_name"};
+   my ($self, $s_tablename, $hr_params) = @_;
+   # my $s_tablename = $hr_params->{"table_name"};
+   my $s_col_name = $hr_params->{"col_name"};
    my $s_dataType = $hr_params->{"data_type"};
    my $s_constraint = $hr_params->{"constraint"};
 
-   my $query = "ALTER TABLE $table_name
-               ADD COLUMN $s_colName $s_dataType $s_constraint;";
+   die "cannot add column: must provide table_name, col_name and data_type!\n" 
+      if ($s_tablename eq "" || $s_col_name eq "" || $s_dataType eq "");
+   
+   my $query = "ALTER TABLE $s_tablename
+               ADD COLUMN $s_col_name $s_dataType $s_constraint;";
    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
-   print "Successfully added column '$s_colName' to table '$table_name'\n";
+   print "Successfully added column '$s_col_name' to table '$s_tablename'\n";
 
 }
 
 sub delete_column_from_table {
-   my ($self, $table_name, $hr_params) = @_;
-   my $s_colName = $hr_params->{"col_name"};
+   my ($self, $s_tablename, $hr_params) = @_;
+   my $s_col_name = $hr_params->{"col_name"};
 
-   my $query = "ALTER TABLE $table_name DROP COLUMN $s_colName;";
+   die "cannot delete column: must provide col_name!\n" if $s_col_name eq "";
+   
+   my $query = "ALTER TABLE $s_tablename DROP COLUMN $s_col_name;";
    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
-   print "Successfully deleted column '$s_colName' from table '$table_name'\n";
+   print "Successfully deleted column '$s_col_name' from table '$s_tablename'\n";
 
 }
 
 sub get_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
+
+   die "cannot get table: must provide 'table_name'!\n" if $s_tablename eq "";
 
    my $query = "SELECT * FROM $s_tablename;";
    my $results = $o_db_handler->prepare($query);
@@ -112,6 +124,9 @@ sub add_row_to_table {
    my $s_created_on = $hr_params->{"created_on"};
    my $query = "";
 
+   die "cannot add row to table: must provide at least table_name and column values!\n" 
+      if ($s_tablename eq "" || $s_name eq "");
+
    if ($s_tablename eq "vm") {
       my $s_os = $hr_params->{"os"};
       $query = "INSERT INTO $s_tablename (name, operating_system, checksum, created_on, last_modified)
@@ -129,16 +144,21 @@ sub add_row_to_table {
 
 sub delete_row_from_table {
    # delete from ... where ... (name/id/...)
-   my ($self, $hr_params) = @_;
-   my $s_tablename = $hr_params->{"table_name"};
+   my ($self, $s_tablename, $hr_params) = @_;
+   # my $s_tablename = $hr_params->{"table_name"};
    my $s_name = $hr_params->{"name"};
    my $s_id = $hr_params->{"id"};
    my $query = "";
+
+   die "cannot delete row from table: must provide table_name!\n"
+      if ($s_tablename eq "");
 
    if ($s_name ne "") {
       $query = "DELETE FROM $s_tablename WHERE name='$s_name';" 
    } elsif ($s_id ne "") {
       $query = "DELETE FROM $s_tablename WHERE id='$s_id';" 
+   } else {
+      die "cannot delete row from table: must provide condition for row to be deleted!\n";
    }
 
    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
@@ -150,6 +170,9 @@ sub get_rows_from_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
    my $s_condition = $hr_params->{"condition"};
+
+   die "cannot fetch rows: must provide 'table_name' and 'condition'!\n" 
+      if ($s_tablename eq "" || $s_condition eq "");
 
    my $query = "SELECT * FROM $s_tablename WHERE $s_condition;";
    my $results = $o_db_handler->prepare($query);
@@ -170,6 +193,9 @@ sub get_col_from_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
    my $s_col = $hr_params->{"column"};
+
+   die "cannot fetch column: must provide 'table_name' and 'column'!\n"
+      if ($s_tablename eq "" || $s_col eq "");
 
    my $query = "SELECT $s_col FROM $s_tablename;";
    my $results = $o_db_handler->prepare($query);
@@ -192,6 +218,10 @@ sub update_row_in_table {
    my $s_col = $hr_params->{"col"};
    my $s_new_value = $hr_params->{"new_value"};
    my $s_condition = $hr_params->{"condition"}; 
+
+   die "cannot update row: must provide 'table_name', 'col', 'new_value' and 'condition'!\n"
+      if ($s_tablename eq "" || $s_col eq "" || $s_new_value eq "" || $s_condition eq "");
+      
    my $query = "UPDATE $s_tablename
                SET $s_col = '$s_new_value'
                WHERE $s_condition;";
@@ -199,5 +229,10 @@ sub update_row_in_table {
    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
    print "updated colum '$s_col' with new value '$s_new_value' in table '$s_tablename'\n";
 }
+
+# sub add_storage_to_vm {
+#    my ($self, $hr_params) = @_;
+
+# }
 
 return 1;
