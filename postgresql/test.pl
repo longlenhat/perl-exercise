@@ -5,5 +5,8 @@
 # require Demo::StringUtils;
 
 # print Demo::StringUtils::zombify("i want brains\n");
+use Digest::MD5 qw(md5_hex);
 
-print 4 x " test";
+$digest = md5_hex("testing","this","stuff");
+
+print $digest,"\n";

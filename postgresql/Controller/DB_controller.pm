@@ -85,13 +85,14 @@ sub get_table {
    if ($_results < 0) {
       print $DBI::errstr;
    }
-
+   my $s_line = "";
    my $col_names = $results->{NAME};
    for (my $i = 0; $i < scalar @$col_names; $i++) {
       print " " . $col_names->[$i] . " |";
+      $s_line = $s_line . "-" x (length($col_names->[$i]) + 2) . "+"; # pretty horizontal line
    }
-   print "\n";
-   print "----+------+------------------+----------+------------+---------------+------------|\n";
+
+   print  "\n", $s_line,"\n";
 
    while (my @row = $results->fetchrow_array()) {
       for (my $i = 0; $i < scalar @row; $i++) {
@@ -104,20 +105,22 @@ sub get_table {
 
 sub add_row_to_table {
    # insert into ... values ...
-   my ($self, $hr_params) = @_;
-   my $s_tablename = $hr_params->{"table_name"};
+   my ($self, $s_tablename, $hr_params) = @_;
+   # my $s_tablename = $hr_params->{"table_name"};
    my $s_name = $hr_params->{"name"};
+   my $s_checksum = $hr_params->{"checksum"};
+   my $s_created_on = $hr_params->{"created_on"};
    my $query = "";
 
    if ($s_tablename eq "vm") {
-      my $s_os = $hr_params->{"operating_system"};
-      $query = "INSERT INTO $s_tablename (name, operating_system)
-                  VALUES ('$s_name', '$s_os');";
+      my $s_os = $hr_params->{"os"};
+      $query = "INSERT INTO $s_tablename (name, operating_system, checksum, created_on, last_modified)
+                  VALUES ('$s_name', '$s_os', '$s_checksum', '$s_created_on', '$s_created_on');";
 
    } elsif ($s_tablename eq "storage") {
       my $s_capacity = $hr_params->{"capacity"};
-      $query = "INSERT INTO $s_tablename (name, capacity)
-                  VALUES ('$s_name', '$s_capacity');";
+      $query = "INSERT INTO $s_tablename (name, capacity, created_on, last_modified)
+                  VALUES ('$s_name', '$s_capacity', '$s_created_on', '$s_created_on');";
    }
 
    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
