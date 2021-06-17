@@ -34,14 +34,19 @@ sub get_db_handler {
    return $o_db_handler;
 }
 
+sub set_db_handler {
+   my ($self, $dbh) = @_;
+   $o_db_handler = $dbh;
+}
+
 sub create_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
 
    die "cannot create table: 'table_name' must be provided!\n" if $s_tablename eq "";
 
-   my $query = "CREATE TABLE $s_tablename ();";
-   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   my $query = "CREATE TABLE IF NOT EXISTS $s_tablename ();";
+   get_db_handler()->prepare($query)->execute() or die $DBI::errstr;
    print "Successfully created table '$s_tablename'\n";
 }
 
@@ -51,14 +56,14 @@ sub delete_table {
 
    die "cannot delete table: 'table_name' must be provided!\n" if $s_tablename eq "";
 
-   my $query = "DROP TABLE $s_tablename;";
-   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   my $query = "DROP TABLE IF EXISTS $s_tablename;";
+   get_db_handler()->prepare($query)->execute() or die $DBI::errstr;
    print "Successfully deleted table '$s_tablename'\n";
 }
 
 sub add_column_to_table {
-   my ($self, $s_tablename, $hr_params) = @_;
-   # my $s_tablename = $hr_params->{"table_name"};
+   my ($self, $hr_params) = @_;
+   my $s_tablename = $hr_params->{"table_name"};
    my $s_col_name = $hr_params->{"col_name"};
    my $s_dataType = $hr_params->{"data_type"};
    my $s_constraint = $hr_params->{"constraint"};
@@ -68,19 +73,20 @@ sub add_column_to_table {
    
    my $query = "ALTER TABLE $s_tablename
                ADD COLUMN $s_col_name $s_dataType $s_constraint;";
-   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   get_db_handler()->prepare($query)->execute() or die $DBI::errstr;
    print "Successfully added column '$s_col_name' to table '$s_tablename'\n";
 
 }
 
 sub delete_column_from_table {
-   my ($self, $s_tablename, $hr_params) = @_;
+   my ($self, $hr_params) = @_;
+   my $s_tablename = $hr_params->{"table_name"};
    my $s_col_name = $hr_params->{"col_name"};
 
    die "cannot delete column: must provide col_name!\n" if $s_col_name eq "";
    
    my $query = "ALTER TABLE $s_tablename DROP COLUMN $s_col_name;";
-   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   get_db_handler()->prepare($query)->execute() or die $DBI::errstr;
    print "Successfully deleted column '$s_col_name' from table '$s_tablename'\n";
 
 }
@@ -92,7 +98,7 @@ sub get_table {
    die "cannot get table: must provide 'table_name'!\n" if $s_tablename eq "";
 
    my $query = "SELECT * FROM $s_tablename;";
-   my $results = $o_db_handler->prepare($query);
+   my $results = get_db_handler()->prepare($query);
    my $_results = $results->execute() or die $DBI::errstr;
    if ($_results < 0) {
       print $DBI::errstr;
@@ -138,7 +144,7 @@ sub add_row_to_table {
                   VALUES ('$s_name', '$s_capacity', '$s_created_on', '$s_created_on');";
    }
 
-   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   get_db_handler()->prepare($query)->execute() or die $DBI::errstr;
    print "row successfully added to table '$s_tablename'\n";
 }
 
@@ -161,7 +167,7 @@ sub delete_row_from_table {
       die "cannot delete row from table: must provide condition for row to be deleted!\n";
    }
 
-   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   get_db_handler()->prepare($query)->execute() or die $DBI::errstr;
    print "row successfully removed from table '$s_tablename'\n";
 }
 
@@ -175,7 +181,7 @@ sub get_rows_from_table {
       if ($s_tablename eq "" || $s_condition eq "");
 
    my $query = "SELECT * FROM $s_tablename WHERE $s_condition;";
-   my $results = $o_db_handler->prepare($query);
+   my $results = get_db_handler()->prepare($query);
    my $_results = $results->execute() or die $DBI::errstr;
 
    if ($_results < 0) {
@@ -198,7 +204,7 @@ sub get_col_from_table {
       if ($s_tablename eq "" || $s_col eq "");
 
    my $query = "SELECT $s_col FROM $s_tablename;";
-   my $results = $o_db_handler->prepare($query);
+   my $results = get_db_handler()->prepare($query);
    my $_results = $results->execute() or die $DBI::errstr;
 
    if ($_results < 0) {
@@ -226,7 +232,7 @@ sub update_row_in_table {
                SET $s_col = '$s_new_value'
                WHERE $s_condition;";
 
-   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   get_db_handler()->prepare($query)->execute() or die $DBI::errstr;
    print "updated colum '$s_col' with new value '$s_new_value' in table '$s_tablename'\n";
 }
 

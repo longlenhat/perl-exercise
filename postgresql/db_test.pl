@@ -42,7 +42,7 @@ my $o_sto1 = Storage->new(
 
 # $o_db_controller->delete_row_from_table("vm", $o_vm1);
 # $o_db_controller->add_row_to_table("vm", $o_vm1);
-# $o_db_controller->get_table($o_table1);
+$o_db_controller->get_table($o_table1);
 # $o_db_controller->add_row_to_table("storage", $o_sto1);
 
 # $o_db_controller->get_rows_from_table({
