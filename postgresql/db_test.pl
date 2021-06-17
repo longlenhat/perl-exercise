@@ -15,9 +15,9 @@ use Storage;
 my $o_db_controller = DB_controller->new({"db_name" => "virtual_machines"});
 my $o_table1 = Table->new("table_name" => "vm");
 my $o_col_name = Column->new(
-    "col_name" => "name",
-    "data_type" => "VARCHAR (25)",
-    "constraint" => "NOT NULL"
+   "col_name" => "name",
+   "data_type" => "VARCHAR (25)",
+   "constraint" => "NOT NULL"
 );
 
 $o_table1->add_col($o_col_name);

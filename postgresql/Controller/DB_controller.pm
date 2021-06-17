@@ -14,141 +14,152 @@ my $o_db_handler = ();
 
 # constructor
 sub new {
-    my ($self, $hr_params) = @_;
-    $s_dbname = $hr_params->{"db_name"};
+   my ($self, $hr_params) = @_;
+   $s_dbname = $hr_params->{"db_name"};
 
-    # connection config
-    $o_db_handler = DBI->connect(
-        "dbi:Pg:dbname=$s_dbname;host=$s_hostname;port=$s_port", # db name and host
-        $s_username, # uname
-        $s_password, #pw
-        # {AutoCommit => 0, RaiseError => 1, PrintError => 0},
-    ) or die $DBI::errstr;
-    print "successfully connected to database '$s_dbname'\n";
-    return bless {"db_name" => $s_dbname}, $self;
+   # connection config
+   $o_db_handler = DBI->connect(
+      "dbi:Pg:dbname=$s_dbname;host=$s_hostname;port=$s_port", # db name and host
+      $s_username, # uname
+      $s_password, #pw
+      # {AutoCommit => 0, RaiseError => 1, PrintError => 0},
+   ) or die $DBI::errstr;
+   print "successfully connected to database '$s_dbname'\n";
+   return bless {"db_name" => $s_dbname}, $self;
 }
 
 # returns db_handler if needed
 sub get_db_handler {
-    return $o_db_handler;
+   return $o_db_handler;
 }
 
 sub create_table {
-    my ($self, $hr_params) = @_;
-    my $s_tablename = $hr_params->{"table_name"};
+   my ($self, $hr_params) = @_;
+   my $s_tablename = $hr_params->{"table_name"};
 
-    my $query = "CREATE TABLE $s_tablename (
-    );";
-    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
-    print "Successfully created table '$s_tablename'\n";
+   my $query = "CREATE TABLE $s_tablename (
+   );";
+   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   print "Successfully created table '$s_tablename'\n";
 }
 
 sub delete_table {
-    my ($self, $hr_params) = @_;
-    my $s_tablename = $hr_params->{"table_name"};
+   my ($self, $hr_params) = @_;
+   my $s_tablename = $hr_params->{"table_name"};
 
-    my $query = "DROP TABLE $s_tablename;";
-    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
-    print "Successfully deleted table '$s_tablename'\n";
+   my $query = "DROP TABLE $s_tablename;";
+   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   print "Successfully deleted table '$s_tablename'\n";
 }
 
 sub add_column_to_table {
-    my ($self, $table_name, $hr_params) = @_;
-    my $s_colName = $hr_params->{"col_name"};
-    my $s_dataType = $hr_params->{"data_type"};
-    my $s_constraint = $hr_params->{"constraint"};
+   my ($self, $table_name, $hr_params) = @_;
+   my $s_colName = $hr_params->{"col_name"};
+   my $s_dataType = $hr_params->{"data_type"};
+   my $s_constraint = $hr_params->{"constraint"};
 
-    my $query = "ALTER TABLE $table_name
-                ADD COLUMN $s_colName $s_dataType $s_constraint;";
-    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
-    print "Successfully added column '$s_colName' to table '$table_name'\n";
+   my $query = "ALTER TABLE $table_name
+               ADD COLUMN $s_colName $s_dataType $s_constraint;";
+   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   print "Successfully added column '$s_colName' to table '$table_name'\n";
 
 }
 
 sub delete_column_from_table {
-    my ($self, $table_name, $hr_params) = @_;
-    my $s_colName = $hr_params->{"col_name"};
+   my ($self, $table_name, $hr_params) = @_;
+   my $s_colName = $hr_params->{"col_name"};
 
-    my $query = "ALTER TABLE $table_name DROP COLUMN $s_colName;";
-    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
-    print "Successfully deleted column '$s_colName' from table '$table_name'\n";
+   my $query = "ALTER TABLE $table_name DROP COLUMN $s_colName;";
+   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   print "Successfully deleted column '$s_colName' from table '$table_name'\n";
 
 }
 
 sub get_table {
-    my ($self, $hr_params) = @_;
-    my $s_tablename = $hr_params->{"table_name"};
+   my ($self, $hr_params) = @_;
+   my $s_tablename = $hr_params->{"table_name"};
 
-    my $query = "SELECT * FROM $s_tablename;";
-    my $results = $o_db_handler->prepare($query);
-    my $_results = $results->execute() or die $DBI::errstr;
-    if ($_results < 0) {
-        print $DBI::errstr;
-    }
+   my $query = "SELECT * FROM $s_tablename;";
+   my $results = $o_db_handler->prepare($query);
+   my $_results = $results->execute() or die $DBI::errstr;
+   if ($_results < 0) {
+      print $DBI::errstr;
+   }
 
-    while (my @row = $results->fetchrow_array()) {
-        print "@row\n";
-    }
+   my $col_names = $results->{NAME};
+   for (my $i = 0; $i < scalar @$col_names; $i++) {
+      print " " . $col_names->[$i] . " |";
+   }
+   print "\n";
+   print "----+------+------------------+----------+------------+---------------+------------|\n";
+
+   while (my @row = $results->fetchrow_array()) {
+      for (my $i = 0; $i < scalar @row; $i++) {
+         my $s_pad = " " x (length($col_names->[$i]) - length($row[$i])); # calculating empty spaces for padding the table
+         print " " .  $row[$i] . $s_pad . " |";
+      }
+      print "\n";
+   }
 }
 
 sub add_row_to_table {
-    # insert into ... values ...
-    my ($self, $hr_params) = @_;
-    my $s_tablename = $hr_params->{"table_name"};
-    my $s_name = $hr_params->{"name"};
-    my $query = "";
+   # insert into ... values ...
+   my ($self, $hr_params) = @_;
+   my $s_tablename = $hr_params->{"table_name"};
+   my $s_name = $hr_params->{"name"};
+   my $query = "";
 
-    if ($s_tablename eq "vm") {
-         my $s_os = $hr_params->{"operating_system"};
-        $query = "INSERT INTO $s_tablename (name, operating_system)
-                    VALUES ('$s_name', '$s_os');";
+   if ($s_tablename eq "vm") {
+      my $s_os = $hr_params->{"operating_system"};
+      $query = "INSERT INTO $s_tablename (name, operating_system)
+                  VALUES ('$s_name', '$s_os');";
 
-    } elsif ($s_tablename eq "storage") {
-        my $s_capacity = $hr_params->{"capacity"};
-        $query = "INSERT INTO $s_tablename (name, capacity)
-                    VALUES ('$s_name', '$s_capacity');";
-    }
+   } elsif ($s_tablename eq "storage") {
+      my $s_capacity = $hr_params->{"capacity"};
+      $query = "INSERT INTO $s_tablename (name, capacity)
+                  VALUES ('$s_name', '$s_capacity');";
+   }
 
-    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
-    print "row successfully added to table '$s_tablename'\n";
+   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   print "row successfully added to table '$s_tablename'\n";
 }
 
 sub delete_row_from_table {
-    # delete from ... where ... (name/id/...)
-    my ($self, $hr_params) = @_;
-    my $s_tablename = $hr_params->{"table_name"};
-    my $s_name = $hr_params->{"name"};
-    my $s_id = $hr_params->{"id"};
-    my $query = "";
+   # delete from ... where ... (name/id/...)
+   my ($self, $hr_params) = @_;
+   my $s_tablename = $hr_params->{"table_name"};
+   my $s_name = $hr_params->{"name"};
+   my $s_id = $hr_params->{"id"};
+   my $query = "";
 
-    if ($s_name ne "") {
-        $query = "DELETE FROM $s_tablename WHERE name='$s_name';" 
-    } elsif ($s_id ne "") {
-        $query = "DELETE FROM $s_tablename WHERE id='$s_id';" 
-    }
+   if ($s_name ne "") {
+      $query = "DELETE FROM $s_tablename WHERE name='$s_name';" 
+   } elsif ($s_id ne "") {
+      $query = "DELETE FROM $s_tablename WHERE id='$s_id';" 
+   }
 
-    $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
-    print "row successfully removed from table '$s_tablename'\n";
+   $o_db_handler->prepare($query)->execute() or die $DBI::errstr;
+   print "row successfully removed from table '$s_tablename'\n";
 }
 
 sub get_rows_from_table {
-    # ...
-    my ($self, $hr_params) = @_;
-    my $s_tablename = $hr_params->{"table_name"};
-    my $s_condition = $hr_params->{"condition"};
+   # ...
+   my ($self, $hr_params) = @_;
+   my $s_tablename = $hr_params->{"table_name"};
+   my $s_condition = $hr_params->{"condition"};
 
-    my $query = "SELECT * FROM $s_tablename WHERE $s_condition;";
-    my $results = $o_db_handler->prepare($query);
-    my $_results = $results->execute() or die $DBI::errstr;
+   my $query = "SELECT * FROM $s_tablename WHERE $s_condition;";
+   my $results = $o_db_handler->prepare($query);
+   my $_results = $results->execute() or die $DBI::errstr;
 
-    if ($_results < 0) {
-        print $DBI::errstr;
-    }
+   if ($_results < 0) {
+      print $DBI::errstr;
+   }
 
-    print "printing all rows where $s_condition \n";
-    while (my @row = $results->fetchrow_array()) {
-        print "@row\n";
-    }
+   print "printing all rows where $s_condition \n";
+   while (my @row = $results->fetchrow_array()) {
+      print "@row\n";
+   }
 
 }
 
