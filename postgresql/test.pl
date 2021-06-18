@@ -1,12 +1,8 @@
-# use strict;
-# use warnings;
+my @os_types = ("ubuntu","debian","opensuse");
+my $os = "win";
 
-# use lib "~/perl5/modules/";
-# require Demo::StringUtils;
+my %lookup = map { $_ => undef } @os_types;
 
-# print Demo::StringUtils::zombify("i want brains\n");
-use Digest::MD5 qw(md5_hex);
-
-$digest = md5_hex("testing","this","stuff");
-
-print $digest,"\n";
+if (!exists $lookup{$os}) {
+   print "not exists";
+}

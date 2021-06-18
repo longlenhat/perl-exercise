@@ -21,8 +21,8 @@ my $o_col_name = Column->new(
 );
 
 my $o_vm1 = VirtualMachine->new(
-   "name" => "vm1",
-   "os" => "ubuntu",
+   "name" => "vm3",
+   "os" => "win",
 );
 
 my $o_sto1 = Storage->new(
@@ -41,7 +41,7 @@ my $o_sto1 = Storage->new(
 # $o_db_controller->delete_column_from_table("test_table", $o_col_name);
 
 # $o_db_controller->delete_row_from_table("vm", $o_vm1);
-# $o_db_controller->add_row_to_table("vm", $o_vm1);
+$o_db_controller->add_row_to_table("vm", $o_vm1);
 $o_db_controller->get_table($o_table1);
 # $o_db_controller->add_row_to_table("storage", $o_sto1);
 

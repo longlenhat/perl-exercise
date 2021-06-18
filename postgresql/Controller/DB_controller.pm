@@ -11,6 +11,8 @@ my $s_port = "5432";
 my $s_username = "postgres";
 my $s_password = "postgres";
 my $o_db_handler = ();
+my @a_os_types = ("ubuntu","debian","opensuse");
+my %h_lookup_os_types = map { $_ => undef } @a_os_types;
 
 # constructor
 sub new {
@@ -28,6 +30,21 @@ sub new {
    print "successfully connected to database '$s_dbname'\n";
    return bless {"db_name" => $s_dbname}, $self;
 }
+
+# checks the os type against list of pre-defined values
+sub _check_os_type {
+   my ($self, $os) = @_;
+   die "error caught: os type must be one of these: {" ,join(", ", @a_os_types), "}\n"
+      if (!exists $h_lookup_os_types{$os});
+}
+
+# sub _can_delete_storage {
+#    my ($self, $hr_params) = @_;
+#    my $s_name = $hr_params->{"name"};
+#    my $s_id = $hr_params->{"id"};
+#    # "select id from storage where name=''"
+#    # "select * from vm where fk_storage="
+# }
 
 # returns db_handler if needed
 sub get_db_handler {
@@ -135,6 +152,7 @@ sub add_row_to_table {
 
    if ($s_tablename eq "vm") {
       my $s_os = $hr_params->{"os"};
+      _check_os_type($s_os);
       $query = "INSERT INTO $s_tablename (name, operating_system, checksum, created_on, last_modified)
                   VALUES ('$s_name', '$s_os', '$s_checksum', '$s_created_on', '$s_created_on');";
 
@@ -227,7 +245,11 @@ sub update_row_in_table {
 
    die "cannot update row: must provide 'table_name', 'col', 'new_value' and 'condition'!\n"
       if ($s_tablename eq "" || $s_col eq "" || $s_new_value eq "" || $s_condition eq "");
-      
+   
+   if ($s_col eq "os") { # checks os type
+      _check_os_type($s_new_value);
+   }
+
    my $query = "UPDATE $s_tablename
                SET $s_col = '$s_new_value'
                WHERE $s_condition;";
