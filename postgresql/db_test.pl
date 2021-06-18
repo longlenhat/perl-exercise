@@ -21,7 +21,7 @@ my $o_col_name = Column->new(
 );
 
 my $o_vm1 = VirtualMachine->new(
-   "name" => "vm3",
+   "name" => "vm1",
    "os" => "ubuntu",
 );
 
@@ -44,7 +44,7 @@ my $o_sto1 = Storage->new(
 # $o_db_controller->add_row_to_table("vm", $o_vm1);
 # $o_db_controller->get_table($o_table1);
 # $o_db_controller->delete_row_from_table("storage", $o_sto1);
-$o_db_controller->add_row_to_table("storage", $o_sto1);
+# $o_db_controller->add_row_to_table("storage", $o_sto1);
 
 # $o_db_controller->get_rows_from_table({
 #     "table_name" => "vm",
@@ -58,6 +58,8 @@ $o_db_controller->add_row_to_table("storage", $o_sto1);
 #     "condition" => "id=31"
 # });
 
-# print "can delete? ", $o_db_controller->_can_delete_storage($o_sto1);
+# $o_db_controller->add_storage_to_vm($o_sto1, $o_vm1);
+# $o_db_controller->remove_storage_from_vm($o_vm1);
+
 
 # print ($INC{"DB_controller.pm"},"\n");
