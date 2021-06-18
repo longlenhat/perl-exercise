@@ -33,18 +33,41 @@ sub new {
 
 # checks the os type against list of pre-defined values
 sub _check_os_type {
-   my ($self, $os) = @_;
+   my ($os) = @_;
    die "error caught: os type must be one of these: {" ,join(", ", @a_os_types), "}\n"
       if (!exists $h_lookup_os_types{$os});
 }
 
-# sub _can_delete_storage {
-#    my ($self, $hr_params) = @_;
-#    my $s_name = $hr_params->{"name"};
-#    my $s_id = $hr_params->{"id"};
-#    # "select id from storage where name=''"
-#    # "select * from vm where fk_storage="
-# }
+sub _can_delete_storage {
+   my ($hr_params) = @_;
+   my $s_name = $hr_params->{"name"};
+   my $s_id = $hr_params->{"id"};
+
+   if ($s_name ne "") { # if only a name is passed we need to query the storage id
+      my $query = "SELECT id FROM STORAGE WHERE name='$s_name';";
+      my $results = get_db_handler()->prepare($query);
+      $results->execute();
+      my @row = $results->fetchrow_array();
+      if (scalar @row == 0) {return 0;} # if no results, storage name does not exists, return false
+      $s_id = @row[0];
+      
+      $query = "SELECT fk_storage FROM vm WHERE fk_storage=$s_id";
+      $results = get_db_handler()->prepare($query);
+      $results->execute();
+      @row = $results->fetchrow_array();
+      if (scalar @row == 0) {return 1;} # if no results, then the storage id is not present as a fk_storage and said storage can be deleted
+      return 0; # otherwise if there are results return false
+
+   } elsif ($s_id ne "") { # if id is passed then we can use it
+      # "select fk_storage from vm where exists (select 1 from storage where id=);"
+      my $query = "SELECT fk_storage FROM vm WHERE fk_storage=$s_id";
+      my $results = get_db_handler()->prepare($query);
+      $results->execute();
+      my @row = $results->fetchrow_array();
+      if (scalar @row == 0) {return 1;} # if no results, then the storage id is not present as a fk_storage and said storage can be deleted
+      return 0; # otherwise if there are results return false
+   }
+}
 
 # returns db_handler if needed
 sub get_db_handler {
@@ -176,6 +199,11 @@ sub delete_row_from_table {
 
    die "cannot delete row from table: must provide table_name!\n"
       if ($s_tablename eq "");
+
+   if ($s_tablename eq "storage") {
+      die "cannot delete row from storage: storage does not exist or is being referenced in table 'vm'\n"
+         if (!_can_delete_storage($hr_params));
+   }
 
    if ($s_name ne "") {
       $query = "DELETE FROM $s_tablename WHERE name='$s_name';" 

@@ -22,12 +22,12 @@ my $o_col_name = Column->new(
 
 my $o_vm1 = VirtualMachine->new(
    "name" => "vm3",
-   "os" => "win",
+   "os" => "ubuntu",
 );
 
 my $o_sto1 = Storage->new(
-   "name" => "sto1",
-   "capacity" => "1024mb"
+   "name" => "sto2",
+   "capacity" => "2024mb"
 );
 
 # print $o_vm1->{"checksum"},"\n";
@@ -41,9 +41,10 @@ my $o_sto1 = Storage->new(
 # $o_db_controller->delete_column_from_table("test_table", $o_col_name);
 
 # $o_db_controller->delete_row_from_table("vm", $o_vm1);
-$o_db_controller->add_row_to_table("vm", $o_vm1);
-$o_db_controller->get_table($o_table1);
-# $o_db_controller->add_row_to_table("storage", $o_sto1);
+# $o_db_controller->add_row_to_table("vm", $o_vm1);
+# $o_db_controller->get_table($o_table1);
+# $o_db_controller->delete_row_from_table("storage", $o_sto1);
+$o_db_controller->add_row_to_table("storage", $o_sto1);
 
 # $o_db_controller->get_rows_from_table({
 #     "table_name" => "vm",
@@ -52,9 +53,11 @@ $o_db_controller->get_table($o_table1);
 
 # $o_db_controller->update_row_in_table({
 #     "table_name" => "vm",
-#     "col" => "name",
-#     "new_value" => "vm16",
-#     "condition" => "id=26"
+#     "col" => "fk_storage",
+#     "new_value" => "6",
+#     "condition" => "id=31"
 # });
+
+# print "can delete? ", $o_db_controller->_can_delete_storage($o_sto1);
 
 # print ($INC{"DB_controller.pm"},"\n");

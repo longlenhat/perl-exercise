@@ -1,5 +1,5 @@
 my @os_types = ("ubuntu","debian","opensuse");
-my $os = "win";
+my $os = "ubuntu";
 
 my %lookup = map { $_ => undef } @os_types;
 
