@@ -4,6 +4,7 @@ package DB_controller;
 use strict;
 # use warnings;
 use DBI;
+use Digest::MD5 qw(md5_hex);
 
 my $s_dbname = "";
 my $s_hostname = "127.0.0.1";
@@ -14,7 +15,7 @@ my $o_db_handler = ();
 my @a_os_types = ("ubuntu","debian","opensuse");
 my %h_lookup_os_types = map { $_ => undef } @a_os_types;
 
-# constructor
+# constructor, connects to database that's been passed as standard user
 sub new {
    my ($self, $hr_params) = @_;
    $s_dbname = $hr_params->{"db_name"};
@@ -77,6 +78,7 @@ sub get_db_handler {
    return $o_db_handler;
 }
 
+# sets new dbhandler if needed
 sub set_db_handler {
    my ($self, $dbh) = @_;
    $o_db_handler = $dbh;
@@ -85,10 +87,10 @@ sub set_db_handler {
 sub create_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
-
+   my $s_query = "";
    die "cannot create table: 'table_name' must be provided!\n" if $s_tablename eq "";
 
-   my $s_query = "CREATE TABLE IF NOT EXISTS $s_tablename ();";
+   $s_query = "CREATE TABLE IF NOT EXISTS $s_tablename ();";
    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
    print "Successfully created table '$s_tablename'\n";
 }
@@ -96,10 +98,10 @@ sub create_table {
 sub delete_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
-
+   my $s_query = "";
    die "cannot delete table: 'table_name' must be provided!\n" if $s_tablename eq "";
 
-   my $s_query = "DROP TABLE IF EXISTS $s_tablename;";
+   $s_query = "DROP TABLE IF EXISTS $s_tablename;";
    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
    print "Successfully deleted table '$s_tablename'\n";
 }
@@ -110,38 +112,40 @@ sub add_column_to_table {
    my $s_col_name = $hr_params->{"col_name"};
    my $s_dataType = $hr_params->{"data_type"};
    my $s_constraint = $hr_params->{"constraint"};
+   my $s_query = "";
 
    die "cannot add column: must provide table_name, col_name and data_type!\n" 
       if ($s_tablename eq "" || $s_col_name eq "" || $s_dataType eq "");
    
-   my $s_query = "ALTER TABLE $s_tablename
+   $s_query = "ALTER TABLE $s_tablename
                ADD COLUMN $s_col_name $s_dataType $s_constraint;";
    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
    print "Successfully added column '$s_col_name' to table '$s_tablename'\n";
-
 }
 
 sub delete_column_from_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
    my $s_col_name = $hr_params->{"col_name"};
+   my $s_query = "";
 
    die "cannot delete column: must provide col_name!\n" if $s_col_name eq "";
    
-   my $s_query = "ALTER TABLE $s_tablename DROP COLUMN $s_col_name;";
+   $s_query = "ALTER TABLE $s_tablename DROP COLUMN $s_col_name;";
    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
    print "Successfully deleted column '$s_col_name' from table '$s_tablename'\n";
-
 }
 
 sub get_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
+   my $s_query = "";
+   my $o_results = ();
 
    die "cannot get table: must provide 'table_name'!\n" if $s_tablename eq "";
 
-   my $s_query = "SELECT * FROM $s_tablename;";
-   my $o_results = get_db_handler()->prepare($s_query);
+   $s_query = "SELECT * FROM $s_tablename;";
+   $o_results = get_db_handler()->prepare($s_query);
    my $_results = $o_results->execute() or die $DBI::errstr;
    if ($_results < 0) {
       print $DBI::errstr;
@@ -165,7 +169,6 @@ sub get_table {
 }
 
 sub add_row_to_table {
-   # insert into ... values ...
    my ($self, $s_tablename, $hr_params) = @_;
    # my $s_tablename = $hr_params->{"table_name"};
    my $s_name = $hr_params->{"name"};
@@ -193,16 +196,17 @@ sub add_row_to_table {
 }
 
 sub delete_row_from_table {
-   # delete from ... where ... (name/id/...)
    my ($self, $s_tablename, $hr_params) = @_;
    # my $s_tablename = $hr_params->{"table_name"};
    my $s_name = $hr_params->{"name"};
    my $s_id = $hr_params->{"id"};
    my $s_query = "";
 
+   # checks for tablename to not be empty
    die "cannot delete row from table: must provide table_name!\n"
       if ($s_tablename eq "");
 
+   # checks if storage can be deleted
    if ($s_tablename eq "storage") {
       die "cannot delete row from storage: storage does not exist or is being referenced in table 'vm'\n"
          if (!_can_delete_storage($hr_params));
@@ -221,16 +225,17 @@ sub delete_row_from_table {
 }
 
 sub get_rows_from_table {
-   # ...
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
    my $s_condition = $hr_params->{"condition"};
+   my $s_query = "";
+   my $o_results = ();
 
    die "cannot fetch rows: must provide 'table_name' and 'condition'!\n" 
       if ($s_tablename eq "" || $s_condition eq "");
 
-   my $s_query = "SELECT * FROM $s_tablename WHERE $s_condition;";
-   my $o_results = get_db_handler()->prepare($s_query);
+   $s_query = "SELECT * FROM $s_tablename WHERE $s_condition;";
+   $o_results = get_db_handler()->prepare($s_query);
    my $_results = $o_results->execute() or die $DBI::errstr;
 
    if ($_results < 0) {
@@ -248,12 +253,14 @@ sub get_col_from_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
    my $s_col = $hr_params->{"column"};
+   my $s_query = "";
+   my $o_results = ();
 
    die "cannot fetch column: must provide 'table_name' and 'column'!\n"
       if ($s_tablename eq "" || $s_col eq "");
 
-   my $s_query = "SELECT $s_col FROM $s_tablename;";
-   my $o_results = get_db_handler()->prepare($s_query);
+   $s_query = "SELECT $s_col FROM $s_tablename;";
+   $o_results = get_db_handler()->prepare($s_query);
    my $_results = $o_results->execute() or die $DBI::errstr;
 
    if ($_results < 0) {
@@ -267,12 +274,14 @@ sub get_col_from_table {
 }
 
 sub update_row_in_table {
-   # update ... set ... where ...
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
    my $s_col = $hr_params->{"col"};
    my $s_new_value = $hr_params->{"new_value"};
    my $s_condition = $hr_params->{"condition"}; 
+   my $s_query = "";
+   my $s_last_modified = localtime; # set last_modified to now
+   my $s_new_checksum = md5_hex($s_new_value, $s_last_modified); # new checksum uses new updated value and last_modified date
 
    die "cannot update row: must provide 'table_name', 'col', 'new_value' and 'condition'!\n"
       if ($s_tablename eq "" || $s_col eq "" || $s_new_value eq "" || $s_condition eq "");
@@ -281,9 +290,18 @@ sub update_row_in_table {
       _check_os_type($s_new_value);
    }
 
-   my $s_query = "UPDATE $s_tablename
-               SET $s_col = '$s_new_value'
-               WHERE $s_condition;";
+   if ($s_tablename eq "vm") {
+      $s_query = "UPDATE $s_tablename 
+                  SET $s_col = '$s_new_value',
+                     checksum='$s_new_checksum',
+                     last_modified='$s_last_modified'
+                  WHERE $s_condition;";
+   } else {
+      $s_query = "UPDATE $s_tablename
+                  SET $s_col = '$s_new_value',
+                     last_modified='$s_last_modified'
+                  WHERE $s_condition;";
+   }
 
    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
    print "updated colum '$s_col' with new value '$s_new_value' in table '$s_tablename'\n";
@@ -298,8 +316,8 @@ sub add_storage_to_vm {
    my $s_query = "";
    my $o_results = ();
    my @a_row = ();
-
-
+   my $s_last_modified = localtime; # set last_modified to now
+   my $s_new_checksum = "";
    die "cannot add storage to vm: must at least provide storage name!\n" if ($s_vm_name eq "");
 
    # get id of storage first if not provided
@@ -312,14 +330,24 @@ sub add_storage_to_vm {
       $s_storage_id = @a_row[0];
    }
 
+   $s_new_checksum = md5_hex($s_storage_id, $s_last_modified); # new checksum uses storage id and last_modified date
+
    # setting the storage id as fk_storage in table vm
    if ($s_vm_name ne "") {
-      $s_query = "UPDATE vm SET fk_storage=$s_storage_id where name='$s_vm_name';";
+      $s_query = "UPDATE vm 
+                  SET fk_storage=$s_storage_id,
+                     last_modified='$s_last_modified',
+                     checksum='$s_new_checksum'
+                  WHERE name='$s_vm_name';";
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
       print "added storage_id $s_storage_id as foreign key to vm '$s_vm_name'\n";
    } elsif ($s_vm_id ne "") {
-      $s_query = "UPDATE vm SET fk_storage=$s_storage_id where id='$s_vm_id';";
+      $s_query = "UPDATE vm 
+                  SET fk_storage=$s_storage_id,
+                     last_modified='$s_last_modified',
+                     checksum='$s_new_checksum'
+                  WHERE id='$s_vm_id';";
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
       print "added storage_id $s_storage_id as foreign key to vm with id=$s_vm_id\n";
@@ -333,15 +361,25 @@ sub remove_storage_from_vm {
    my $s_id = $hr_params->{"id"};
    my $s_query = "";
    my $o_results = ();
+   my $s_last_modified = localtime; # set last_modified to now
+   my $s_new_checksum = md5_hex($s_last_modified); # new checksum uses last_modified date
 
    # set fk_storage to null
    if ($s_name ne "") {
-      $s_query = "UPDATE vm SET fk_storage=null where name='$s_name';";
+      $s_query = "UPDATE vm 
+                  SET fk_storage=null,
+                     last_modified='$s_last_modified',
+                     checksum='$s_new_checksum'
+                  WHERE name='$s_name';";
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
       print "removed storage from vm '$s_name'\n";
    } elsif ($s_id ne "") {
-      $s_query = "UPDATE vm SET fk_storage=nullwhere id='$s_id';";
+      $s_query = "UPDATE vm 
+                  SET fk_storage=null,
+                     last_modified='$s_last_modified',
+                     checksum='$s_new_checksum'
+                  WHERE id='$s_id';";
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
       print "removed storage from vm with id=$s_id\n";

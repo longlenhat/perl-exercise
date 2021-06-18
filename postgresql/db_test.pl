@@ -53,12 +53,12 @@ my $o_sto1 = Storage->new(
 
 # $o_db_controller->update_row_in_table({
 #     "table_name" => "vm",
-#     "col" => "fk_storage",
-#     "new_value" => "6",
+#     "col" => "operating_system",
+#     "new_value" => "debian",
 #     "condition" => "id=31"
 # });
 
-# $o_db_controller->add_storage_to_vm($o_sto1, $o_vm1);
+$o_db_controller->add_storage_to_vm($o_sto1, $o_vm1);
 # $o_db_controller->remove_storage_from_vm($o_vm1);
 
 
