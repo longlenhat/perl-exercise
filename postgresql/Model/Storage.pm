@@ -1,6 +1,8 @@
+#!/usr/bin/env perl
 package Storage;
+
 use strict;
-# use warnings;
+use warnings;
 use Time::Piece;
 use Digest::MD5 qw(md5_hex);
 
@@ -26,11 +28,9 @@ sub _set_datetime {
 sub _calculate_checksum {
    my $self = shift @_;
    my $s_checksum = md5_hex( # create init checksum
-      $self->{"id"},
       $self->{"name"},
       $self->{"capacity"},
       $self->{"created_on"},
-      $self->{"last_modified"},
    );
    $self->{"checksum"} = $s_checksum;
 }

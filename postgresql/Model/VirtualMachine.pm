@@ -1,6 +1,8 @@
+#!/usr/bin/env perl
 package VirtualMachine;
+
 use strict;
-# use warnings;
+use warnings;
 use Digest::MD5 qw(md5_hex);
 
 sub new {
@@ -25,12 +27,9 @@ sub _set_datetime {
 sub _calculate_checksum {
    my $self = shift @_;
    my $s_checksum = md5_hex( # create init checksum
-      $self->{"id"},
       $self->{"name"},
       $self->{"os"},
       $self->{"created_on"},
-      $self->{"last_modified"},
-      $self->{"fk_storage"},
    );
    $self->{"checksum"} = $s_checksum;
 }
