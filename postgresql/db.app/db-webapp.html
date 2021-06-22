@@ -6,10 +6,9 @@
 </head>
 
 <body>
-   <h1>Database Webapplication</h1>
-   <!-- My Home Directory is <TMPL_VAR NAME=HOME>
-      <p>
-         My Path is set to <TMPL_VAR NAME=PATH> -->
+   <h1>
+      Database Webapplication: <TMPL_VAR NAME=Title>
+   </h1>
    Get Table:
    <form>
       <select name="Tables">
@@ -20,6 +19,31 @@
          <submit>Get Table</submit>
       </button>
    </form>
+
+   <div id="table">
+      <table>
+         <tr>
+            <!-- loop through column names from database table -->
+            <TMPL_LOOP NAME="COL_NAMES">
+               <th>
+                  <TMPL_VAR NAME="COL">
+               </th>
+            </TMPL_LOOP>
+         </tr>
+         <!-- loop through rows from database table-->
+         <TMPL_LOOP NAME="ROWS_LOOP">
+            <tr>
+               <TMPL_LOOP NAME="ROW">
+                  <th>
+                     <TMPL_VAR NAME="COL_VALUE">
+                  </th>
+               </TMPL_LOOP>
+            </tr>
+         </TMPL_LOOP>
+
+      </table>
+   </div>
+
 </body>
 
 </html>

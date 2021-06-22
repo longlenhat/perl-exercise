@@ -12,22 +12,22 @@ use Column;
 use VirtualMachine;
 use Storage;
 
-my $o_db_controller = DB_controller->new({"db_name" => "virtual_machines"});
-my $o_table1 = Table->new("table_name" => "vm");
-my $o_col_name = Column->new(
-	"col_name" => "name",
-	"data_type" => "VARCHAR (25)",
-	"constraint" => "NOT NULL"
+my $o_db_controller = DB_controller->new( { "db_name" => "virtual_machines" } );
+my $o_table1        = Table->new( "table_name" => "storage" );
+my $o_col_name      = Column->new(
+    "col_name"   => "name",
+    "data_type"  => "VARCHAR (25)",
+    "constraint" => "NOT NULL"
 );
 
 my $o_vm1 = VirtualMachine->new(
-	"name" => "vm1",
-	"os" => "ubuntu",
+    "name" => "vm1",
+    "os"   => "ubuntu",
 );
 
 my $o_sto1 = Storage->new(
-	"name" => "sto2",
-	"capacity" => "2024mb"
+    "name"     => "sto2",
+    "capacity" => "2024mb"
 );
 
 # print $o_vm1->{"checksum"},"\n";
@@ -42,7 +42,10 @@ my $o_sto1 = Storage->new(
 
 # $o_db_controller->delete_row_from_table("vm", $o_vm1);
 # $o_db_controller->add_row_to_table("vm", $o_vm1);
-$o_db_controller->get_table($o_table1);
+my ( $col_names, $arr ) = $o_db_controller->get_table($o_table1);
+
+print scalar @$col_names, "\n";
+print scalar @$arr[0], "\n";
 
 # $o_db_controller->delete_row_from_table("storage", $o_sto1);
 # $o_db_controller->add_row_to_table("storage", $o_sto1);
@@ -59,9 +62,8 @@ $o_db_controller->get_table($o_table1);
 #     "condition" => "id=31"
 # });
 
-$o_db_controller->add_storage_to_vm($o_sto1, $o_vm1);
+# $o_db_controller->add_storage_to_vm($o_sto1, $o_vm1);
 
 # $o_db_controller->remove_storage_from_vm($o_vm1);
-
 
 # print ($INC{"DB_controller.pm"},"\n");
