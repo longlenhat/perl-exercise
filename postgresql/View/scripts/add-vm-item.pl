@@ -31,11 +31,15 @@ my $o_vm1 = VirtualMachine->new(
 );
 
 print qq(Content-type: text/html\n\n);
-
-if ($o_db_controller->add_row_to_table("vm", $o_vm1)) {
+eval {
+   $o_db_controller->add_row_to_table("vm", $o_vm1);
    print '<meta http-equiv="refresh" content="1.5;url=/scripts/db-app.pl" />';
-} else {
-   print '<meta http-equiv="refresh" content="1.5;url=/scripts/db-app.pl" />';
+};
+if ($@) {
+   print "$@\n";
+   print "<br>";
+   print "redirecting in 7s...\n";
+   print '<meta http-equiv="refresh" content="7;url=/scripts/db-app.pl" />';
 }
 
 # print "<h3>Successful! Redirecting ...</h3>";
