@@ -16,6 +16,9 @@
       <button class="storage" onClick="openTab(event, 'storage')">Storage</button>
    </div>
 
+   <!-- ######################################################### -->
+   <!-- ##################### VM Tab ############################ -->
+
    <div id="vm" class="tabcontent" style="display:block;">
 
       <!-- table that prints out database entries from db-table "vm" -->
@@ -123,6 +126,9 @@
       </form>
    </div>
 
+   <!-- ######################################################### -->
+   <!-- ##################### Storage Tab ####################### -->
+
    <div id="storage" class="tabcontent">
 
       <!-- table that prints out database entries from db-table "storage" -->
@@ -151,6 +157,41 @@
          </TMPL_LOOP>
       </table>
 
+      <hr>
+
+      Add New Item:
+      <div id="add_row">
+         <form action="/scripts/storage-add-item.pl" method="post">
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" required="required"><br>
+            <label for="capacity">Capacity:</label><br>
+            <input type="text" id="capacity" name="capacity" required="required"><br>
+            <input type="submit" value="Submit">
+         </form>
+      </div>
+
+      <hr>
+
+      Delete Item:
+      <form action="/scripts/storage-delete-item.pl" method="post">
+         <select name="storage" required>
+            <option disabled selected value> -- select an option -- </option>
+            <TMPL_LOOP NAME=CUR_ITEMS>
+               <TMPL_IF NAME="STOR">
+                  <option name="name">
+                     <TMPL_VAR NAME=STOR>
+                  </option>
+               </TMPL_IF>
+            </TMPL_LOOP>
+         </select>
+         <input type="submit" value="Submit">
+      </form>
+
+      <hr>
+
+      Update Item:
+
+      <hr>
    </div>
 
 </body>

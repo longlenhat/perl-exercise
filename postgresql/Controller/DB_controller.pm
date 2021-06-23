@@ -360,7 +360,7 @@ sub update_row_in_table {
 
    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
 
-   # print "updated colum '$s_col' with new value '$s_new_value' in table '$s_tablename'\n";
+   print "updated colum '$s_col' with new value '$s_new_value' in table '$s_tablename'\n";
 }
 
 sub add_storage_to_vm {
