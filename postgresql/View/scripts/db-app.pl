@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 
 use strict;
 use warnings;
@@ -107,11 +107,17 @@ sub get_cur_items_in_db {
    );
 
 
-   # loop through column names (header)
+   # loop through column "names" in vm
    my @a_col_names = ();
-   while (@a_vm_entries and @a_stor_entries) {
+   while (@a_vm_entries) {
       my %h_row_data = ();
-      $h_row_data{VM}   = shift @a_vm_entries;
+      $h_row_data{VM} = shift @a_vm_entries;
+      push(@a_col_names, \%h_row_data);
+   }
+
+   # loop through column "names" in storage
+   while (@a_stor_entries) {
+      my %h_row_data = ();
       $h_row_data{STOR} = shift @a_stor_entries;
       push(@a_col_names, \%h_row_data);
    }

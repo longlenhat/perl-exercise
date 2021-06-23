@@ -48,11 +48,11 @@
 
       Add New Item:
       <div id="add_row">
-         <form action="/index.html">
+         <form action="/scripts/add-vm-item.pl" method="post">
             <label for="name">Name:</label><br>
-            <input type="text" id="name" required="required"><br>
+            <input type="text" id="name" name="name" required="required"><br>
             <label for="os">Operating System:</label><br>
-            <input type="text" id="os" required="required"><br>
+            <input type="text" id="os" name="os" required="required"><br>
             <input type="submit" value="Submit">
          </form>
       </div>
@@ -64,9 +64,11 @@
          <select name="vm" required>
             <option disabled selected value> -- select an option -- </option>
             <TMPL_LOOP NAME=CUR_ITEMS>
-               <option value="">
-                  <TMPL_VAR NAME=VM>
-               </option>
+               <TMPL_IF NAME="VM">
+                  <option value="">
+                     <TMPL_VAR NAME=VM>
+                  </option>
+               </TMPL_IF>
             </TMPL_LOOP>
          </select>
          <input type="submit" value="Submit">
@@ -83,17 +85,21 @@
          <select name="vm" required>
             <option disabled selected value> -- select an option -- </option>
             <TMPL_LOOP NAME=CUR_ITEMS>
-               <option value="">
-                  <TMPL_VAR NAME=VM>
-               </option>
+               <TMPL_IF NAME="VM">
+                  <option value="">
+                     <TMPL_VAR NAME=VM>
+                  </option>
+               </TMPL_IF>
             </TMPL_LOOP>
          </select>
          <select name="storage" required>
             <option disabled selected value> -- select an option -- </option>
             <TMPL_LOOP NAME=CUR_ITEMS>
-               <option value="">
-                  <TMPL_VAR NAME=STOR>
-               </option>
+               <TMPL_IF NAME="STOR">
+                  <option value="">
+                     <TMPL_VAR NAME=STOR>
+                  </option>
+               </TMPL_IF>
             </TMPL_LOOP>
          </select>
          <input type="submit" value="Submit">
@@ -103,9 +109,15 @@
 
       Remove Storage from VM:
       <form>
-         <select name="vm">
-            <option value="">vm1</option>
-            <option value="">vm2</option>
+         <select name="vm" required>
+            <option disabled selected value> -- select an option -- </option>
+            <TMPL_LOOP NAME=CUR_ITEMS>
+               <TMPL_IF NAME="VM">
+                  <option value="">
+                     <TMPL_VAR NAME=VM>
+                  </option>
+               </TMPL_IF>
+            </TMPL_LOOP>
          </select>
          <input type="submit" value="Submit">
       </form>
