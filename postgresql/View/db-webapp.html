@@ -81,12 +81,12 @@
       <hr>
 
       Link Storage to VM:
-      <form>
+      <form action="/scripts/vm-add-storage.pl" method="post">
          <select name="vm" required>
             <option disabled selected value> -- select an option -- </option>
             <TMPL_LOOP NAME=CUR_ITEMS>
                <TMPL_IF NAME="VM">
-                  <option value="">
+                  <option name="vm">
                      <TMPL_VAR NAME=VM>
                   </option>
                </TMPL_IF>
@@ -96,7 +96,7 @@
             <option disabled selected value> -- select an option -- </option>
             <TMPL_LOOP NAME=CUR_ITEMS>
                <TMPL_IF NAME="STOR">
-                  <option value="">
+                  <option name="storage">
                      <TMPL_VAR NAME=STOR>
                   </option>
                </TMPL_IF>
@@ -108,12 +108,12 @@
       <hr>
 
       Remove Storage from VM:
-      <form>
+      <form action="/scripts/vm-remove-storage.pl" method="post">
          <select name="vm" required>
             <option disabled selected value> -- select an option -- </option>
             <TMPL_LOOP NAME=CUR_ITEMS>
                <TMPL_IF NAME="VM">
-                  <option value="">
+                  <option name="vm">
                      <TMPL_VAR NAME=VM>
                   </option>
                </TMPL_IF>

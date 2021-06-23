@@ -403,7 +403,7 @@ sub add_storage_to_vm {
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
 
-      # print "added storage_id $s_storage_id as foreign key to vm '$s_vm_name'\n";
+      print "added storage_id $s_storage_id as foreign key to vm '$s_vm_name'\n";
    }
    elsif ($s_vm_id ne "") {
       $s_query = "UPDATE vm 
@@ -414,7 +414,7 @@ sub add_storage_to_vm {
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
 
-      # print "added storage_id $s_storage_id as foreign key to vm with id=$s_vm_id\n";
+      print "added storage_id $s_storage_id as foreign key to vm with id=$s_vm_id\n";
    }
 
 }
@@ -439,7 +439,7 @@ sub remove_storage_from_vm {
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
 
-      # print "removed storage from vm '$s_name'\n";
+      print "removed storage from vm '$s_name'\n";
    }
    elsif ($s_id ne "") {
       $s_query = "UPDATE vm 
@@ -450,7 +450,7 @@ sub remove_storage_from_vm {
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
 
-      # print "removed storage from vm with id=$s_id\n";
+      print "removed storage from vm with id=$s_id\n";
    }
 }
 
