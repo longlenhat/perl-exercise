@@ -2,10 +2,10 @@
 package DB_controller;
 
 use strict;
-
-# use warnings;
+use warnings;
 use DBI;
 use Digest::MD5 qw(md5_hex);
+use Scalar::Util qw(looks_like_number);
 
 my $s_dbname          = "";
 my $s_hostname        = "127.0.0.1";
@@ -208,8 +208,7 @@ sub add_row_to_table {
    my $s_created_on = $hr_params->{"created_on"};
    my $s_query      = "";
 
-   die
-"cannot add row to table: must provide at least table_name and column values!\n"
+   die "cannot add row to table: must provide at least table_name and column values!\n"
       if ($s_tablename eq "" || $s_name eq "");
 
    if ($s_tablename eq "vm") {
@@ -222,6 +221,8 @@ sub add_row_to_table {
    }
    elsif ($s_tablename eq "storage") {
       my $s_capacity = $hr_params->{"capacity"};
+      die "cannot add row to table: capacity must be a numeric value (in megabytes)!\n" if !looks_like_number($s_capacity);
+      $s_capacity = $s_capacity . "mb";
       $s_query =
          "INSERT INTO $s_tablename (name, capacity, created_on, last_modified)
                   VALUES ('$s_name', '$s_capacity', '$s_created_on', '$s_created_on');";
@@ -246,8 +247,7 @@ sub delete_row_from_table {
 
    # checks if storage can be deleted
    if ($s_tablename eq "storage") {
-      die
-"cannot delete row from storage: storage does not exist or is being referenced in table 'vm'\n"
+      die "cannot delete row from storage: storage does not exist or is being referenced in table 'vm'\n"
          if (!_can_delete_storage($hr_params));
    }
 
@@ -258,8 +258,7 @@ sub delete_row_from_table {
       $s_query = "DELETE FROM $s_tablename WHERE id='$s_id';";
    }
    else {
-      die
-"cannot delete row from table: must provide condition for row to be deleted!\n";
+      die "cannot delete row from table: must provide condition for row to be deleted!\n";
    }
 
    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
@@ -333,8 +332,7 @@ sub update_row_in_table {
    my $s_new_checksum = md5_hex($s_new_value, $s_last_modified)
       ;    # new checksum uses new updated value and last_modified date
 
-   die
-"cannot update row: must provide 'table_name', 'col', 'new_value' and 'condition'!\n"
+   die "cannot update row: must provide 'table_name', 'col', 'new_value' and 'condition'!\n"
       if ($s_tablename eq ""
       || $s_col eq ""
       || $s_new_value eq ""
@@ -342,6 +340,12 @@ sub update_row_in_table {
 
    if ($s_col eq "os" || $s_col eq "operating_system") {    # checks os type
       _check_os_type($s_new_value);
+   }
+
+   if ($s_col eq "capacity" && !looks_like_number($s_new_value)) {
+      die "cannot update row: capacity must be a numeric value (in megabytes)!\n";
+   } else {
+      $s_new_value = $s_new_value . "mb";
    }
 
    if ($s_tablename eq "vm") {
