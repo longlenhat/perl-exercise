@@ -1,0 +1,146 @@
+<html>
+
+<head>
+   <link rel="stylesheet" href="../db-webapp.css">
+   <script type="text/javascript" src="../db-webapp.js"></script>
+   <title>Test Template</title>
+</head>
+
+<body>
+   <h1>
+      Database Webapplication: <TMPL_VAR NAME=Title>
+   </h1>
+
+   <div class="tab">
+      <button class="vm" onClick="openTab(event, 'vm')">Virtual Machines</button>
+      <button class="storage" onClick="openTab(event, 'storage')">Storage</button>
+   </div>
+
+   <div id="vm" class="tabcontent" style="display:block;">
+
+      <!-- table that prints out database entries from db-table "vm" -->
+      <table>
+         <tr>
+            <!-- loop through column names from database table -->
+            <TMPL_LOOP NAME="COL_NAMES">
+               <TMPL_IF NAME="COL_VM">
+                  <th>
+                     <TMPL_VAR NAME="COL_VM">
+                  </th>
+               </TMPL_IF>
+            </TMPL_LOOP>
+         </tr>
+         <!-- loop through rows from database table-->
+         <TMPL_LOOP NAME="ROWS_LOOP">
+            <TMPL_IF NAME="ROW_VM">
+               <tr>
+                  <TMPL_LOOP NAME="ROW_VM">
+                     <td>
+                        <TMPL_VAR NAME="COL_VALUE">
+                     </td>
+                  </TMPL_LOOP>
+               </tr>
+            </TMPL_IF>
+         </TMPL_LOOP>
+      </table>
+
+      <hr>
+
+      Add New Item:
+      <div id="add_row">
+         <form action="/index.html">
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" required="required"><br>
+            <label for="os">Operating System:</label><br>
+            <input type="text" id="os" required="required"><br>
+            <input type="submit" value="Submit">
+         </form>
+      </div>
+
+      <hr>
+
+      Delete Item:
+      <form>
+         <select name="vm" required>
+            <option disabled selected value> -- select an option -- </option>
+            <TMPL_LOOP NAME=CUR_ITEMS>
+               <option value="">
+                  <TMPL_VAR NAME=VM>
+               </option>
+            </TMPL_LOOP>
+         </select>
+         <input type="submit" value="Submit">
+      </form>
+
+      <hr>
+
+      Update Item:
+
+      <hr>
+
+      Link Storage to VM:
+      <form>
+         <select name="vm" required>
+            <option disabled selected value> -- select an option -- </option>
+            <TMPL_LOOP NAME=CUR_ITEMS>
+               <option value="">
+                  <TMPL_VAR NAME=VM>
+               </option>
+            </TMPL_LOOP>
+         </select>
+         <select name="storage" required>
+            <option disabled selected value> -- select an option -- </option>
+            <TMPL_LOOP NAME=CUR_ITEMS>
+               <option value="">
+                  <TMPL_VAR NAME=STOR>
+               </option>
+            </TMPL_LOOP>
+         </select>
+         <input type="submit" value="Submit">
+      </form>
+
+      <hr>
+
+      Remove Storage from VM:
+      <form>
+         <select name="vm">
+            <option value="">vm1</option>
+            <option value="">vm2</option>
+         </select>
+         <input type="submit" value="Submit">
+      </form>
+   </div>
+
+   <div id="storage" class="tabcontent">
+
+      <!-- table that prints out database entries from db-table "storage" -->
+      <table>
+         <tr>
+            <!-- loop through column names from database table -->
+            <TMPL_LOOP NAME="COL_NAMES">
+               <TMPL_IF NAME="COL_STOR">
+                  <th>
+                     <TMPL_VAR NAME="COL_STOR">
+                  </th>
+               </TMPL_IF>
+            </TMPL_LOOP>
+         </tr>
+         <!-- loop through rows from database table-->
+         <TMPL_LOOP NAME="ROWS_LOOP">
+            <TMPL_IF NAME="ROW_STOR">
+               <tr>
+                  <TMPL_LOOP NAME="ROW_STOR">
+                     <td>
+                        <TMPL_VAR NAME="COL_VALUE">
+                     </td>
+                  </TMPL_LOOP>
+               </tr>
+            </TMPL_IF>
+         </TMPL_LOOP>
+      </table>
+
+   </div>
+
+</body>
+
+</html>
