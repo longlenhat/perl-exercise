@@ -264,7 +264,7 @@ sub delete_row_from_table {
 
    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
 
-   # print "row successfully removed from table '$s_tablename'\n";
+   print "row successfully removed from table '$s_tablename'\n";
 }
 
 sub get_rows_from_table {

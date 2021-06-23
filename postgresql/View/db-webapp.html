@@ -48,7 +48,7 @@
 
       Add New Item:
       <div id="add_row">
-         <form action="/scripts/add-vm-item.pl" method="post">
+         <form action="/scripts/vm-add-item.pl" method="post">
             <label for="name">Name:</label><br>
             <input type="text" id="name" name="name" required="required"><br>
             <label for="os">Operating System:</label><br>
@@ -60,12 +60,12 @@
       <hr>
 
       Delete Item:
-      <form>
+      <form action="/scripts/vm-delete-item.pl" method="post">
          <select name="vm" required>
             <option disabled selected value> -- select an option -- </option>
             <TMPL_LOOP NAME=CUR_ITEMS>
                <TMPL_IF NAME="VM">
-                  <option value="">
+                  <option name="name">
                      <TMPL_VAR NAME=VM>
                   </option>
                </TMPL_IF>

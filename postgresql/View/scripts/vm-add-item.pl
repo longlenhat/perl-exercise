@@ -6,11 +6,10 @@ use lib "$Bin/../../Controller";
 use lib "$Bin/../../Model";
 use DB_controller;
 use VirtualMachine;
-use CGI::Carp qw(fatalsToBrowser);
 
 # parsing and reading the input forms
-read(STDIN, my $s_data, $ENV{'CONTENT_LENGTH'});
-my @a_form_field = split(/&/, $s_data);
+read(STDIN, my $s_form_data, $ENV{'CONTENT_LENGTH'});
+my @a_form_field = split(/&/, $s_form_data);
 my ($s_field, $s_name, $s_value);
 my %h_form;
 
@@ -35,11 +34,9 @@ eval {
    $o_db_controller->add_row_to_table("vm", $o_vm1);
    print '<meta http-equiv="refresh" content="1.5;url=/scripts/db-app.pl" />';
 };
-if ($@) {
+if ($@) {    # printing error
    print "$@\n";
    print "<br>";
-   print "redirecting in 7s...\n";
-   print '<meta http-equiv="refresh" content="7;url=/scripts/db-app.pl" />';
+   print "redirecting in 5s...\n";
+   print '<meta http-equiv="refresh" content="5;url=/scripts/db-app.pl" />';
 }
-
-# print "<h3>Successful! Redirecting ...</h3>";
