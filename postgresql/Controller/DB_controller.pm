@@ -340,7 +340,7 @@ sub update_row_in_table {
       || $s_new_value eq ""
       || $s_condition eq "");
 
-   if ($s_col eq "os") {    # checks os type
+   if ($s_col eq "os" || $s_col eq "operating_system") {    # checks os type
       _check_os_type($s_new_value);
    }
 

@@ -80,7 +80,25 @@
       <hr>
 
       Update Item:
-
+      <form action="/scripts/vm-update-item.pl" method="post">
+         <select name="vm" required>
+            <option disabled selected value> -- select an option -- </option>
+            <TMPL_LOOP NAME=CUR_ITEMS>
+               <TMPL_IF NAME="VM">
+                  <option name="name">
+                     <TMPL_VAR NAME=VM>
+                  </option>
+               </TMPL_IF>
+            </TMPL_LOOP>
+         </select>
+         <select name="column" required>
+            <option disabled selected value> -- select an option -- </option>
+            <option name="name">name</option>
+            <option name="os">operating_system</option>
+         </select>
+         <input type="text" id="new_val" name="new_val" required="required" placeholder="new value"><br>
+         <input type="submit" value="Submit">
+      </form>
       <hr>
 
       Link Storage to VM:
@@ -190,8 +208,28 @@
       <hr>
 
       Update Item:
+      <form action="/scripts/storage-update-item.pl" method="post">
+         <select name="storage" required>
+            <option disabled selected value> -- select an option -- </option>
+            <TMPL_LOOP NAME=CUR_ITEMS>
+               <TMPL_IF NAME="STOR">
+                  <option name="name">
+                     <TMPL_VAR NAME=STOR>
+                  </option>
+               </TMPL_IF>
+            </TMPL_LOOP>
+         </select>
+         <select name="column" required>
+            <option disabled selected value> -- select an option -- </option>
+            <option name="name">name</option>
+            <option name="capacity">capacity</option>
+         </select>
+         <input type="text" id="new_val" name="new_val" required="required" placeholder="new value"><br>
+         <input type="submit" value="Submit">
+      </form>
 
       <hr>
+
    </div>
 
 </body>
