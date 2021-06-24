@@ -34,6 +34,8 @@ eval {
          "name" => $h_form{"vm"}
       }
    );
+   print "<br>";
+   print "Redirecting...";
    print '<meta http-equiv="refresh" content="2;url=/scripts/db-app.pl" />';
 };
 if ($@) {

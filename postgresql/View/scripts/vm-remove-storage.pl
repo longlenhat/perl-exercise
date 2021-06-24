@@ -19,7 +19,8 @@ eval {
          "name" => $s_form_data,
       }
    );
-
+   print "<br>";
+   print "Redirecting...";
    print '<meta http-equiv="refresh" content="2;url=/scripts/db-app.pl" />';
 };
 if ($@) {

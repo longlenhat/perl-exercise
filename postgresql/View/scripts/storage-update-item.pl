@@ -32,7 +32,8 @@ eval {
          "new_value"  => "$h_form{'new_val'}",
          "condition"  => "name='$h_form{'storage'}'"
    });
-
+   print "<br>";
+   print "Redirecting...";
    print '<meta http-equiv="refresh" content="1.5;url=/scripts/db-app.pl" />';
 };
 if ($@) {    # printing error

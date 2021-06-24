@@ -14,6 +14,8 @@ print qq(Content-type: text/html\n\n);
 
 eval {
    $o_db_controller->delete_row_from_table("vm", {"name" => "$s_form_data"});
+   print "<br>";
+   print "Redirecting...";
    print '<meta http-equiv="refresh" content="1.5;url=/scripts/db-app.pl" />';
 };
 if ($@) {

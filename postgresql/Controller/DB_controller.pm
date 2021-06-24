@@ -344,8 +344,6 @@ sub update_row_in_table {
 
    if ($s_col eq "capacity" && !looks_like_number($s_new_value)) {
       die "cannot update row: capacity must be a numeric value (in megabytes)!\n";
-   } else {
-      $s_new_value = $s_new_value . "mb";
    }
 
    if ($s_tablename eq "vm") {
@@ -356,7 +354,8 @@ sub update_row_in_table {
                   WHERE $s_condition;";
    }
    else {
-      $s_query = "UPDATE $s_tablename
+      $s_new_value = $s_new_value . "mb";
+      $s_query     = "UPDATE $s_tablename
                   SET $s_col = '$s_new_value',
                      last_modified='$s_last_modified'
                   WHERE $s_condition;";

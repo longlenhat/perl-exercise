@@ -33,6 +33,8 @@ print qq(Content-type: text/html\n\n);
 
 eval {
    $o_db_controller->add_row_to_table("storage", $o_sto1);
+   print "<br>";
+   print "Redirecting...";
    print '<meta http-equiv="refresh" content="1.5;url=/scripts/db-app.pl" />';
 };
 if ($@) {    # printing error
