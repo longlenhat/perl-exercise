@@ -332,11 +332,11 @@ sub update_row_in_table {
    my $s_condition     = $hr_params->{"condition"};
    my $s_query         = "";
    my $s_last_modified = localtime;                   # set last_modified to now
-   my $s_new_checksum = md5_hex($s_new_value, $s_last_modified)
-      ;    # new checksum uses new updated value and last_modified date
 
    die "cannot update row: must provide 'table_name', 'col', 'new_value' and 'condition'!\n"
       if (!$s_tablename || !$s_col || !$s_new_value || !$s_condition);
+
+   my $s_new_checksum = md5_hex($s_new_value, $s_last_modified); # new checksum uses new updated value and last_modified date
 
    if ($s_col eq "os" || $s_col eq "operating_system") {    # checks os type
       _check_os_type($s_new_value);
