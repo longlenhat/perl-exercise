@@ -7,6 +7,7 @@ use DBI;
 use Digest::MD5 qw(md5_hex);
 use Scalar::Util qw(looks_like_number);
 
+# database config params
 my $s_dbname          = "";
 my $s_hostname        = "127.0.0.1";
 my $s_port            = "5432";
@@ -25,18 +26,15 @@ sub new {
 
    # connection config
    $o_db_handler = DBI->connect(
-      "dbi:Pg:dbname=$s_dbname;host=$s_hostname;port=$s_port"
-      ,               # db name and host
-      $s_username,    # uname
-      $s_password,    #pw
-                      # {AutoCommit => 0, RaiseError => 1, PrintError => 0},
+      "dbi:Pg:dbname=$s_dbname;host=$s_hostname;port=$s_port", # db name and host
+      $s_username,                                             # uname
+      $s_password,                                             #pw
    ) or die $DBI::errstr;
 
-   # print "successfully connected to database '$s_dbname'\n";
    return bless {"db_name" => $s_dbname}, $self;
 }
 
-# checks the os type against list of pre-defined values
+# checks the os type against list of pre-defined values, dies if os is not in list
 sub _check_os_type {
    my ($os) = @_;
    die "error caught: os type must be one of these: {",
@@ -53,36 +51,46 @@ sub _can_delete_storage {
    my $o_results   = ();
    my @a_row       = ();
 
-   if ($s_name)
-   {    # if only a name is passed we need to s_query the storage id
+   # if only a name is passed we need to query the storage id
+   if ($s_name) {
       $s_query   = "SELECT id FROM STORAGE WHERE name='$s_name';";
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
       @a_row = $o_results->fetchrow_array();
+
+      # if no results, storage name does not exists, return false
       if (scalar @a_row == 0) {
          return 0;
-      }    # if no results, storage name does not exists, return false
+      }
+
+      # else we get the id of storage and check if this id is being referenced in table vm
       $s_id = $a_row[0];
 
       $s_query   = "SELECT fk_storage FROM vm WHERE fk_storage=$s_id";
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
       @a_row = $o_results->fetchrow_array();
+
+      # if no results, then the storage id is not present as a fk_storage and said storage can be deleted
       if (scalar @a_row == 0) {
          return 1;
-      } # if no results, then the storage id is not present as a fk_storage and said storage can be deleted
-      return 0;    # otherwise if there are results return false
+      }
 
-   }
-   elsif ($s_id) {    # if id is passed then we can use it
+      # otherwise if there are results return false
+      return 0;
+   } elsif ($s_id) {    # if id is passed then we can use it
       $s_query   = "SELECT fk_storage FROM vm WHERE fk_storage=$s_id";
       $o_results = get_db_handler()->prepare($s_query);
       $o_results->execute();
       @a_row = $o_results->fetchrow_array();
+
+      # if no results, then the storage id is not present as a fk_storage and said storage can be deleted
       if (scalar @a_row == 0) {
          return 1;
-      } # if no results, then the storage id is not present as a fk_storage and said storage can be deleted
-      return 0;    # otherwise if there are results return false
+      }
+
+      # otherwise if there are results return false
+      return 0;
    }
 }
 
@@ -97,64 +105,7 @@ sub set_db_handler {
    $o_db_handler = $dbh;
 }
 
-# sub create_table {
-#    my ($self, $hr_params) = @_;
-#    my $s_tablename = $hr_params->{"table_name"};
-#    my $s_query     = "";
-#    die "cannot create table: 'table_name' must be provided!\n"
-#       if $s_tablename eq "";
-
-#    $s_query = "CREATE TABLE IF NOT EXISTS $s_tablename ();";
-#    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
-
-#    # print "Successfully created table '$s_tablename'\n";
-# }
-
-# sub delete_table {
-#    my ($self, $hr_params) = @_;
-#    my $s_tablename = $hr_params->{"table_name"};
-#    my $s_query     = "";
-#    die "cannot delete table: 'table_name' must be provided!\n"
-#       if $s_tablename eq "";
-
-#    $s_query = "DROP TABLE IF EXISTS $s_tablename;";
-#    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
-
-#    # print "Successfully deleted table '$s_tablename'\n";
-# }
-
-# sub add_column_to_table {
-#    my ($self, $hr_params) = @_;
-#    my $s_tablename  = $hr_params->{"table_name"};
-#    my $s_col_name   = $hr_params->{"col_name"};
-#    my $s_dataType   = $hr_params->{"data_type"};
-#    my $s_constraint = $hr_params->{"constraint"};
-#    my $s_query      = "";
-
-#    die "cannot add column: must provide table_name, col_name and data_type!\n"
-#       if ($s_tablename eq "" || $s_col_name eq "" || $s_dataType eq "");
-
-#    $s_query = "ALTER TABLE $s_tablename
-#                ADD COLUMN $s_col_name $s_dataType $s_constraint;";
-#    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
-
-#    # print "Successfully added column '$s_col_name' to table '$s_tablename'\n";
-# }
-
-# sub delete_column_from_table {
-#    my ($self, $hr_params) = @_;
-#    my $s_tablename = $hr_params->{"table_name"};
-#    my $s_col_name  = $hr_params->{"col_name"};
-#    my $s_query     = "";
-#    my @a_results   = ();
-#    die "cannot delete column: must provide col_name!\n" if $s_col_name eq "";
-
-#    $s_query = "ALTER TABLE $s_tablename DROP COLUMN $s_col_name;";
-#    get_db_handler()->prepare($s_query)->execute() or die $DBI::errstr;
-
-#    # print "Successfully deleted column '$s_col_name' from table '$s_tablename'\n";
-# }
-
+# query a table and return 2 arrays containing column names and the row values
 sub get_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
@@ -175,8 +126,8 @@ sub get_table {
    my $s_line    = "";
    my $col_names = $o_results->{NAME};
 
+   # # pretty print the table onto console
    # for ( my $i = 0 ; $i < scalar @$col_names ; $i++ ) {
-
    #     print " " . $col_names->[$i] . " |";
    #     $s_line =
    #         $s_line
@@ -189,6 +140,7 @@ sub get_table {
    while (my @a_row = $o_results->fetchrow_array()) {
       push(@a_results, @a_row);
 
+      # # pretty print the table onto console
       # for ( my $i = 0 ; $i < scalar @a_row ; $i++ ) {
       #     my $s_pad =
       #       " " x ( length( $col_names->[$i] ) - length( $a_row[$i] ) )
@@ -202,10 +154,10 @@ sub get_table {
    return (\@$col_names, \@a_results);
 }
 
+# inserts given row with values into the table
 sub add_row_to_table {
    my ($self, $s_tablename, $hr_params) = @_;
 
-   # my $s_tablename = $hr_params->{"table_name"};
    my $s_name       = $hr_params->{"name"};
    my $s_checksum   = $hr_params->{"checksum"};
    my $s_created_on = $hr_params->{"created_on"};
@@ -217,12 +169,10 @@ sub add_row_to_table {
    if ($s_tablename eq "vm") {
       my $s_os = $hr_params->{"os"};
       _check_os_type($s_os);
-      $s_query =
-"INSERT INTO $s_tablename (name, operating_system, checksum, created_on, last_modified)
+      $s_query = "INSERT INTO $s_tablename (name, operating_system, checksum, created_on, last_modified)
                   VALUES ('$s_name', '$s_os', '$s_checksum', '$s_created_on', '$s_created_on');";
 
-   }
-   elsif ($s_tablename eq "storage") {
+   } elsif ($s_tablename eq "storage") {
       my $s_capacity = $hr_params->{"capacity"};
       die "cannot add row to table: capacity must be a numeric value (in megabytes)!\n" if !looks_like_number($s_capacity);
       $s_capacity = $s_capacity . "mb";
@@ -236,10 +186,10 @@ sub add_row_to_table {
    print "row successfully added to table '$s_tablename'\n";
 }
 
+# delete specific row from a table
 sub delete_row_from_table {
    my ($self, $s_tablename, $hr_params) = @_;
 
-   # my $s_tablename = $hr_params->{"table_name"};
    my $s_name  = $hr_params->{"name"};
    my $s_id    = $hr_params->{"id"};
    my $s_query = "";
@@ -269,6 +219,7 @@ sub delete_row_from_table {
    print "row successfully removed from table '$s_tablename'\n";
 }
 
+# query all rows from a table given a condition
 sub get_rows_from_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
@@ -287,13 +238,9 @@ sub get_rows_from_table {
       print $DBI::errstr;
    }
 
-   # print "printing all rows where $s_condition \n";
-   # while ( my @a_row = $o_results->fetchrow_array() ) {
-   #     print "@a_row\n";
-   # }
-
 }
 
+# select a single column from a table
 sub get_col_from_table {
    my ($self, $hr_params) = @_;
    my $s_tablename = $hr_params->{"table_name"};
@@ -324,6 +271,7 @@ sub get_col_from_table {
    return @a_col_entries;
 }
 
+# updates a specific row in table
 sub update_row_in_table {
    my ($self, $hr_params) = @_;
    my $s_tablename     = $hr_params->{"table_name"};
@@ -366,6 +314,7 @@ sub update_row_in_table {
    print "updated colum '$s_col' with new value '$s_new_value' in table '$s_tablename'\n";
 }
 
+# link a storage object from the storage table to an object in the vm table
 sub add_storage_to_vm {
    my ($self, $hr_params_storage, $hr_params_vm) = @_;
    my $s_storage_name  = $hr_params_storage->{"name"};
@@ -377,8 +326,8 @@ sub add_storage_to_vm {
    my @a_row           = ();
    my $s_last_modified = localtime;                   # set last_modified to now
    my $s_new_checksum  = "";
-   die "cannot add storage to vm: must at least provide storage name!\n"
 
+   die "cannot add storage to vm: must at least provide storage name!\n"
       if ($s_vm_name eq "");
 
    # get id of storage first if not provided
@@ -393,8 +342,7 @@ sub add_storage_to_vm {
       $s_storage_id = $a_row[0];
    }
 
-   $s_new_checksum = md5_hex($s_storage_id, $s_last_modified)
-      ;    # new checksum uses storage id and last_modified date
+   $s_new_checksum = md5_hex($s_storage_id, $s_last_modified); # new checksum uses storage id and last_modified date
 
    # setting the storage id as fk_storage in table vm
    if ($s_vm_name) {
@@ -407,8 +355,7 @@ sub add_storage_to_vm {
       $o_results->execute();
 
       print "added storage_id $s_storage_id as foreign key to vm '$s_vm_name'\n";
-   }
-   elsif ($s_vm_id) {
+   } elsif ($s_vm_id) {
       $s_query = "UPDATE vm 
                   SET fk_storage=$s_storage_id,
                      last_modified='$s_last_modified',
@@ -443,8 +390,7 @@ sub remove_storage_from_vm {
       $o_results->execute();
 
       print "removed storage from vm '$s_name'\n";
-   }
-   elsif ($s_id) {
+   } elsif ($s_id) {
       $s_query = "UPDATE vm 
                   SET fk_storage=null,
                      last_modified='$s_last_modified',
